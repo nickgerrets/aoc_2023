@@ -4,9 +4,12 @@
 # include <istream>
 # include <limits>
 
-# define SIGN(x) (x > 0) - (x < 0)
-
 namespace aoc {
+
+template <typename T> constexpr
+int sign(T const& x) {
+	return int((x > 0) - (x < 0));
+}
 
 //	ignore stream until next digit
 std::istream& next_digit(std::istream& in) {
