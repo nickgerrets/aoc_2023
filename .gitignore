@@ -1,6 +1,10 @@
 # don't want to post my input
 input.txt
 
+# cmake
+build
+.cache
+
 #vscode
 .vscode
 
