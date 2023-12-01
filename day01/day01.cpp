@@ -9,15 +9,15 @@ namespace aoc {
 // a handy 'list' to iterate through
 static std::unordered_map<std::string, uint64_t> digit_map {
 	{"zero", 0},
-	{"one", 1},	
-	{"two", 2},	
-	{"three", 3},	
-	{"four", 4},	
-	{"five", 5},	
-	{"six", 6},	
-	{"seven", 7},	
-	{"eight", 8},	
-	{"nine", 9},	
+	{"one", 1},
+	{"two", 2},
+	{"three", 3},
+	{"four", 4},
+	{"five", 5},
+	{"six", 6},
+	{"seven", 7},
+	{"eight", 8},
+	{"nine", 9},
 };
 
 uint64_t get_first_digit(std::string const& line) {
@@ -72,7 +72,7 @@ uint64_t get_last_digit(std::string const& line) {
 	return digit;
 }
 
-uint64_t get_sum_first_and_last(std::ifstream& stream) {
+uint64_t get_sum(std::ifstream& stream) {
 	uint64_t sum = 0;
 	// Iterate through the entire document line by line
 	for (std::string line; std::getline(stream, line); ) {
@@ -92,7 +92,7 @@ int	main(int argc, char **argv) {
 	if (!file)
 		return (EXIT_FAILURE);
 	
-	uint64_t sum = aoc::get_sum_first_and_last(file);
+	uint64_t sum = aoc::get_sum(file);
 
 	std::cout << "Sum of all calibration values: " << sum << std::endl;
 	
