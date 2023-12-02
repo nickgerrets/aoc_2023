@@ -52,7 +52,7 @@ struct LineIterator {
 
 // handy for range-based loops
 struct Lines {
-	Lines(std::ifstream& in);
+	Lines(std::istream& in);
 	LineIterator begin() const;
 	LineIterator end() const;
 

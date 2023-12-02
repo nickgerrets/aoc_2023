@@ -70,7 +70,7 @@ bool LineIterator::operator!=(LineIterator const& rhs) {
 	return input_stream != rhs.input_stream;
 }
 
-Lines::Lines(std::ifstream& in) : input_stream(in) {}
+Lines::Lines(std::istream& in) : input_stream(in) {}
 
 LineIterator Lines::begin() const {
 	return LineIterator(input_stream);
