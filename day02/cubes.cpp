@@ -2,6 +2,10 @@
 
 #include <vector>
 #include <sstream>
+#include <unordered_map>
+
+// Easier parsing by creating a locale
+static auto const LOCALE = aoc::create_delimitor_locale<':', ',', ';'>();
 
 struct Game {
 	uint64_t red;
@@ -9,14 +13,17 @@ struct Game {
 	uint64_t blue;
 
 	uint64_t* get_color(std::string const& str) {
-		if (str.find("red") != std::string::npos) {
-			return &red;
-		} else if (str.find("green") != std::string::npos) {
-			return &green;
-		} else if (str.find("blue") != std::string::npos) {
-			return &blue;
+		static std::unordered_map<std::string, uint64_t&> const COLOR_BINDS {{
+			{"red", red},
+			{"green", green},
+			{"blue", blue}
+		}};
+
+		auto it = COLOR_BINDS.find(str);
+		if (it != COLOR_BINDS.end()) {
+			return &(it->second);
 		}
-		return nullptr;
+		return nullptr; // unknown color
 	}
 
 	uint64_t power(void) const {
@@ -27,7 +34,7 @@ struct Game {
 std::vector<Game> parse_games(std::istream& stream) {
 	std::vector<Game> games;
 	for (auto line : aoc::Lines(stream)) {
-		std::istringstream ss(line);
+		std::istringstream ss(line); ss.imbue(LOCALE);
 		Game game {0, 0, 0};
 		uint64_t x;
 		std::string color;

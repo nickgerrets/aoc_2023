@@ -13,12 +13,6 @@ std::istream& next_digit(std::istream& in) {
 	return (in);
 }
 
-template <char CHARACTER>
-std::istream& skip(std::istream& in) {
-	return (in.ignore(std::numeric_limits<std::streamsize>::max(), CHARACTER));
-}
-
-
 std::ifstream get_input_file(int argc, char** argv) {
 	if (argc < 2) {
 		throw std::runtime_error(std::string("usage: ") + argv[0] + " <file>");
