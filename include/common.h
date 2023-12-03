@@ -67,7 +67,7 @@ struct Lines {
 /* -------------------------------------------------------------------------- */
 /*                                   Locale                                   */
 /* -------------------------------------------------------------------------- */
-// custom facets for locale's, allowing easier parsing through streams
+// custom facets for locales, allowing easier parsing through streams
 template <char C, char... Args>
 struct DelimitorFacet : public std::ctype<char> {
 	DelimitorFacet(size_t refs = 0) : std::ctype<char>(custom_table, false, refs) {

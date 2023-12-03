@@ -8,11 +8,14 @@
 static auto const LOCALE = aoc::create_delimitor_locale<':', ',', ';'>();
 
 struct Game {
+	// Could've gone with a hash-map based approach (I didn't bother)
 	uint64_t red;
 	uint64_t green;
 	uint64_t blue;
 
 	uint64_t* get_color(std::string const& str) {
+		// For some reason I did go with a tiny hash-map here.
+		// Overhead is way too big for it's benefits, could easily just do 3 if-statements
 		static std::unordered_map<std::string, uint64_t&> const COLOR_BINDS {{
 			{"red", red},
 			{"green", green},
@@ -34,7 +37,10 @@ struct Game {
 std::vector<Game> parse_games(std::istream& stream) {
 	std::vector<Game> games;
 	for (auto line : aoc::Lines(stream)) {
+
+		// Imbuing streams with a customized locale is pretty cool
 		std::istringstream ss(line); ss.imbue(LOCALE);
+		
 		Game game {0, 0, 0};
 		uint64_t x;
 		std::string color;
@@ -42,14 +48,15 @@ std::vector<Game> parse_games(std::istream& stream) {
 		// Skip "Game x"
 		ss >> aoc::next_digit >> x;
 
-		// While we have a digit-color pair
-		while (ss >> aoc::next_digit >> x >> color) {
+		// While we have a number-color pair
+		while (ss >> x >> color) {
 			// get a ptr to the corresponding color-count integer within current game
 			auto* c = game.get_color(color);
 			if (!c) {
+				// Some bad error handling
 				throw std::runtime_error("bad color");
 			}
-			// Assign the color if it's the maximum
+			// We only care about the biggest number
 			*c = std::max(*c, x);
 		}
 		games.push_back(game);
@@ -58,7 +65,7 @@ std::vector<Game> parse_games(std::istream& stream) {
 }
 
 uint64_t sum_games_id(std::vector<Game> const& games) {
-	const Game max_game {
+	static Game const max_game {
 		.red = 12,
 		.green = 13,
 		.blue = 14
@@ -90,8 +97,8 @@ int main(int argc, char** argv) {
 
 	std::vector<Game> games = parse_games(file);
 
-	std::cout << "Sum of IDs of games: " << sum_games_id(games) << std::endl;
-	std::cout << "Sum of power of games: " << sum_games_power(games) << std::endl;
+	std::cout << "(part 1) Sum of IDs of games:   " << sum_games_id(games) << std::endl;
+	std::cout << "(part 2) Sum of power of games: " << sum_games_power(games) << std::endl;
 
 	return (EXIT_SUCCESS);
 }
