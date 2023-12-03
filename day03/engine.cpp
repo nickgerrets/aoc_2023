@@ -34,12 +34,11 @@ bool is_adjacent(std::vector<std::string> const& schematic, uint64_t x, uint64_t
 uint64_t parse_n(std::string const& line, uint64_t x) {
 	uint64_t n = 0;
 	// Go all the way to the start of the number
-	while (std::isdigit(line[x])) {
+	while (x > 0 && std::isdigit(line[x - 1])) {
 		--x;
 	}
-	++x;
 	// simple unsigned integer parse (without overflow check)
-	while (std::isdigit(line[x])) {
+	while (std::isdigit(line[x]) && x < line.length()) {
 		n = (n * 10) + line[x] - '0';
 		++x;
 	}
