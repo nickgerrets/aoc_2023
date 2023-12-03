@@ -2,14 +2,6 @@
 
 #include <vector>
 
-std::vector<std::string> parse_schematic(std::istream& input) {
-	std::vector<std::string> schematic;
-	for (auto& line : aoc::Lines(input)) {
-		schematic.emplace_back(std::move(line));
-	}
-	return schematic;
-}
-
 bool is_symbol(char c) {
 	return (!std::isdigit(c) && c != '.');
 }
@@ -29,6 +21,30 @@ bool is_adjacent(std::vector<std::string> const& schematic, uint64_t x, uint64_t
 	}
 
 	return adjacent;
+}
+
+// Part 1
+uint64_t sum_parts(std::vector<std::string> const& schematic) {
+	uint64_t sum = 0;
+	for (size_t y = 0; y < schematic.size(); ++y) {
+		for (size_t x = 0; x < schematic[0].length(); ++x) {
+			if (std::isdigit(schematic[y][x])) {
+				// parse and check number
+				bool adjacent = false;
+				uint64_t n = 0;
+				// A simple unsigned parse without overflow check, combined with adjacent check
+				while (std::isdigit(schematic[y][x]) && schematic[0].length()) {
+					adjacent |= is_adjacent(schematic, x, y);
+					n = (n * 10) + (schematic[y][x] - '0');
+					++x;
+				}
+				if (adjacent) {
+					sum += n;
+				}
+			}
+		}
+	}
+	return sum;
 }
 
 uint64_t parse_n(std::string const& line, uint64_t x) {
@@ -76,29 +92,7 @@ uint64_t calculate_ratio(std::vector<std::string> const& schematic, uint64_t x, 
 	return ratio;
 }
 
-uint64_t sum_parts(std::vector<std::string> const& schematic) {
-	uint64_t sum = 0;
-	for (size_t y = 0; y < schematic.size(); ++y) {
-		for (size_t x = 0; x < schematic[0].length(); ++x) {
-			if (std::isdigit(schematic[y][x])) {
-				// parse and check number
-				bool adjacent = false;
-				uint64_t n = 0;
-				// A simple unsigned parse without overflow check, combined with adjacent check
-				while (std::isdigit(schematic[y][x]) && schematic[0].length()) {
-					adjacent |= is_adjacent(schematic, x, y);
-					n = (n * 10) + (schematic[y][x] - '0');
-					++x;
-				}
-				if (adjacent) {
-					sum += n;
-				}
-			}
-		}
-	}
-	return sum;
-}
-
+// Part 2
 uint64_t sum_gears(std::vector<std::string> const& schematic) {
 	uint64_t sum = 0;
 	for (size_t y = 0; y < schematic.size(); ++y) {
@@ -110,6 +104,19 @@ uint64_t sum_gears(std::vector<std::string> const& schematic) {
 		}
 	}
 	return sum;
+}
+
+std::vector<std::string> parse_schematic(std::istream& input) {
+	std::vector<std::string> schematic;
+	for (auto& line : aoc::Lines(input)) {
+		schematic.emplace_back(std::move(line));
+
+		// Bad error handling
+		if (line.length() != schematic[0].length()) {
+			throw std::runtime_error("bad schematic");
+		}
+	}
+	return schematic;
 }
 
 int main(int argc, char** argv) {
