@@ -5,7 +5,7 @@
 std::vector<std::string> parse_schematic(std::istream& input) {
 	std::vector<std::string> schematic;
 	for (auto& line : aoc::Lines(input)) {
-		schematic.emplace_back(line);
+		schematic.emplace_back(std::move(line));
 	}
 	return schematic;
 }
@@ -17,22 +17,15 @@ bool is_symbol(char c) {
 bool is_adjacent(std::vector<std::string> const& schematic, uint64_t x, uint64_t y) {
 	bool adjacent = false;
 
-	// can we check the left side?
-	if (x > 0) {
-		adjacent |= (y > 0 && is_symbol(schematic[y - 1][x - 1]));
-		adjacent |= (is_symbol(schematic[y][x - 1]));
-		adjacent |= (y < schematic.size() - 1 && is_symbol(schematic[y + 1][x - 1]));
-	}
+	uint64_t x_max = std::min(x + 2, schematic[0].length());
+	uint64_t y_max = std::min(y + 2, schematic.size());
+	uint64_t x_start = (x > 0) ? x - 1 : x;
+	uint64_t y_start = (y > 0) ? y - 1 : y;
 
-	// middle
-	adjacent |= (y > 0 && is_symbol(schematic[y - 1][x]));
-	adjacent |= (y < schematic.size() - 1 && is_symbol(schematic[y + 1][x]));
-
-	// right
-	if (x < schematic[0].length() - 1) {
-		adjacent |= (y > 0 && is_symbol(schematic[y - 1][x + 1]));
-		adjacent |= (is_symbol(schematic[y][x + 1]));
-		adjacent |= (y < schematic.size() - 1 && is_symbol(schematic[y + 1][x + 1]));
+	for (y = y_start; y < y_max; ++y) {
+		for (x = x_start; x < x_max; ++x) {
+			adjacent |= is_symbol(schematic[y][x]);
+		}
 	}
 
 	return adjacent;
@@ -40,10 +33,12 @@ bool is_adjacent(std::vector<std::string> const& schematic, uint64_t x, uint64_t
 
 uint64_t parse_n(std::string const& line, uint64_t x) {
 	uint64_t n = 0;
+	// Go all the way to the start of the number
 	while (std::isdigit(line[x])) {
 		--x;
 	}
 	++x;
+	// simple unsigned integer parse (without overflow check)
 	while (std::isdigit(line[x])) {
 		n = (n * 10) + line[x] - '0';
 		++x;
@@ -54,50 +49,43 @@ uint64_t parse_n(std::string const& line, uint64_t x) {
 uint64_t calculate_ratio(std::vector<std::string> const& schematic, uint64_t x, uint64_t y) {
 	uint64_t ratio = 1;
 	uint64_t count = 0;
-	size_t yy = y;
-	if (y > 0) {
-		yy = y - 1;
-	}
-	for (yy; yy < schematic.size() && yy <= y + 1; ++yy) {
-		size_t xx = x;
-		if (x > 0) {
-			xx = x - 1;
-		}
-		for (xx; xx < schematic[0].length() && xx <= x + 1; ++xx) {
-			std::cout << "checking " << schematic[yy][xx] << std::endl;
+	
+	uint64_t x_max = std::min(x + 2, schematic[0].length());
+	uint64_t y_max = std::min(y + 2, schematic.size());
+	uint64_t x_start = (x > 0) ? x - 1 : x;
+	uint64_t y_start = (y > 0) ? y - 1 : y;
 
-
-			if (std::isdigit(schematic[yy][xx])) {
-				uint64_t n = parse_n(schematic[yy], xx);
-
-				std::cout << "Found " << n << " ratio_prev: " << ratio << std::endl;
-
-				ratio *= n;
+	for (y = y_start; y < y_max; ++y) {
+		for (x = x_start; x < x_max; ++x) {
+			if (std::isdigit(schematic[y][x])) {
+				// If we found a number, parse and multiply
+				ratio *= parse_n(schematic[y], x);
 				++count;
+
 				// skip digits that have already been parsed
-				while (std::isdigit(schematic[yy][xx])) {
-					++xx;
+				while (std::isdigit(schematic[y][x])) {
+					++x;
 				}
 			}
 		}
 	}
 
+	// Just in place so gears with only 1 (or 0) adjacent numbers aren't counted
 	if (count <= 1) {
 		return 0;
 	}
-
 	return ratio;
 }
 
 uint64_t sum_parts(std::vector<std::string> const& schematic) {
 	uint64_t sum = 0;
-
 	for (size_t y = 0; y < schematic.size(); ++y) {
 		for (size_t x = 0; x < schematic[0].length(); ++x) {
 			if (std::isdigit(schematic[y][x])) {
 				// parse and check number
 				bool adjacent = false;
 				uint64_t n = 0;
+				// A simple unsigned parse without overflow check, combined with adjacent check
 				while (std::isdigit(schematic[y][x]) && schematic[0].length()) {
 					adjacent |= is_adjacent(schematic, x, y);
 					n = (n * 10) + (schematic[y][x] - '0');
@@ -109,7 +97,6 @@ uint64_t sum_parts(std::vector<std::string> const& schematic) {
 			}
 		}
 	}
-
 	return sum;
 }
 
@@ -119,9 +106,6 @@ uint64_t sum_gears(std::vector<std::string> const& schematic) {
 		for (size_t x = 0; x < schematic[0].length(); ++x) {
 			if (schematic[y][x] == '*') {
 				uint64_t ratio = calculate_ratio(schematic, x, y);
-
-				std::cout << "Gear ratio: " << ratio << std::endl;
-
 				sum += ratio;
 			}
 		}
@@ -129,19 +113,14 @@ uint64_t sum_gears(std::vector<std::string> const& schematic) {
 	return sum;
 }
 
-
-
 int main(int argc, char** argv) {
 	auto file = aoc::get_input_file(argc, argv);
 
+	// The schematic is basically a 2d-array
 	std::vector<std::string> schematic = parse_schematic(file);
 
-	// for (auto& line : schematic) {
-	// 	std::cout << line << std::endl;
-	// }
-
-	std::cout << "Sum of all parts is: " << sum_parts(schematic) << std::endl;
-	std::cout << "Sum of all gear ratios is: " << sum_gears(schematic) << std::endl;
+	std::cout << "(part 1) Sum of all parts is:       " << sum_parts(schematic) << std::endl;
+	std::cout << "(part 2) Sum of all gear ratios is: " << sum_gears(schematic) << std::endl;
 
 	return (EXIT_SUCCESS);
 }
