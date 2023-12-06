@@ -15,7 +15,8 @@ std::istream& next_digit(std::istream& in) {
 
 std::ifstream get_input_file(int argc, char** argv) {
 	if (argc < 2) {
-		throw std::runtime_error(std::string("usage: ") + argv[0] + " <file>");
+		// throw std::runtime_error(std::string("usage: ") + argv[0] + " <file>");
+		return std::ifstream();
 	}
 
 	std::ifstream file(argv[1]);
@@ -23,6 +24,14 @@ std::ifstream get_input_file(int argc, char** argv) {
 		throw std::runtime_error(std::string("Can't open file \"") + argv[1] + '\"');
 	}
 	return std::move(file);
+}
+
+std::unique_ptr<std::istream, InputDelete> get_input(int argc, char** argv) {
+	auto file = aoc::get_input_file(argc, argv);
+	if (file.is_open()) {
+		return std::unique_ptr<std::istream, InputDelete>(new std::ifstream(std::move(file)));
+	}
+	return std::unique_ptr<std::istream, InputDelete>(&std::cin);
 }
 
 // === Line Iterator ===

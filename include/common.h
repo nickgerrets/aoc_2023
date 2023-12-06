@@ -26,6 +26,18 @@ std::istream& skip(std::istream& in) {
 // return input file stream of input file or throw exception
 std::ifstream get_input_file(int argc, char** argv);
 
+
+struct InputDelete {
+	void operator()(std::istream* p) const {
+		if (&std::cin == p) {
+			return ;
+		}
+		delete p;
+	}
+};
+
+std::unique_ptr<std::istream, InputDelete> get_input(int argc, char** argv);
+
 /* -------------------------------------------------------------------------- */
 /*                                Line Iterator                               */
 /* -------------------------------------------------------------------------- */

@@ -112,9 +112,9 @@ uint64_t product(std::vector<Race> const& races) {
 }
 
 int main(int argc, char** argv) {
-	auto file = aoc::get_input_file(argc, argv);
+	auto input = aoc::get_input(argc, argv);
 
-	auto result = parse_races(file);
+	auto result = parse_races(*input);
 
 	std::cout << "(Part 1) Product of ways to beat: " << product(result.races) << std::endl;
 	std::cout << "(Part 2) ways to beat big race:   " << result.big_race.ways_to_beat() << std::endl;
