@@ -103,20 +103,14 @@ result_t parse_races(std::istream& stream) {
 	return result;
 }
 
-uint64_t product(std::vector<Race> const& races) {
-	uint64_t product = 1;
-	for (auto& r : races) {
-		product *= r.ways_to_beat();
-	}
-	return product;
-}
-
 int main(int argc, char** argv) {
 	auto input = aoc::get_input(argc, argv);
 
 	auto result = parse_races(*input);
 
-	std::cout << "(Part 1) Product of ways to beat: " << product(result.races) << std::endl;
+	std::cout << "(Part 1) Product of ways to beat: "
+		<< aoc::product<uint64_t>(result.races, &Race::ways_to_beat)
+		<< std::endl;
 	std::cout << "(Part 2) ways to beat big race:   " << result.big_race.ways_to_beat() << std::endl;
 
 	return (EXIT_SUCCESS);

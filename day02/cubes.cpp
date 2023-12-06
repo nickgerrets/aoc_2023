@@ -84,21 +84,17 @@ uint64_t sum_games_id(std::vector<Game> const& games) {
 	return sum;
 }
 
-uint64_t sum_games_power(std::vector<Game> const& games) {
-	uint64_t power = 0;
-	for (auto const& game : games) {
-		power += game.power();
-	}
-	return power;
-}
-
 int main(int argc, char** argv) {
 	auto file = aoc::get_input_file(argc, argv);
 
 	std::vector<Game> games = parse_games(file);
 
-	std::cout << "(part 1) Sum of IDs of games:   " << sum_games_id(games) << std::endl;
-	std::cout << "(part 2) Sum of power of games: " << sum_games_power(games) << std::endl;
+	std::cout << "(part 1) Sum of IDs of games:   "
+		<< sum_games_id(games)
+		<< std::endl;
+	std::cout << "(part 2) Sum of power of games: "
+		<< aoc::sum<uint64_t>(games, &Game::power)
+		<< std::endl;
 
 	return (EXIT_SUCCESS);
 }

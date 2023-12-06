@@ -39,6 +39,45 @@ struct InputDelete {
 std::unique_ptr<std::istream, InputDelete> get_input(int argc, char** argv);
 
 /* -------------------------------------------------------------------------- */
+/*                                 Aggregates                                 */
+/* -------------------------------------------------------------------------- */
+template <typename T, typename ContainerT>
+T sum(ContainerT const& container) {
+	T n = 0;
+	for (auto const& e : container) {
+		n = n + e;
+	}
+	return n;
+}
+
+template <typename T, typename ContainerT, typename _Method>
+T sum(ContainerT const& container, _Method method) {
+	T n = 0;
+	for (auto const& e : container) {
+		n = n + (e.*method)();
+	}
+	return n;
+}
+
+template <typename T, typename ContainerT>
+T product(ContainerT const& container) {
+	T n = 1;
+	for (auto const& e : container) {
+		n = n * e;
+	}
+	return n;
+}
+
+template <typename T, typename ContainerT, typename _Method>
+T product(ContainerT const& container, _Method method) {
+	T n = 1;
+	for (auto const& e : container) {
+		n = n * (e.*method)();
+	}
+	return n;
+}
+
+/* -------------------------------------------------------------------------- */
 /*                                Line Iterator                               */
 /* -------------------------------------------------------------------------- */
 // for iterating through lines in a (file)stream
