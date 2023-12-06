@@ -121,10 +121,10 @@ std::vector<std::string> parse_schematic(std::istream& input) {
 }
 
 int main(int argc, char** argv) {
-	auto file = aoc::get_input_file(argc, argv);
+	auto input = aoc::get_input(argc, argv);
 
 	// The schematic is basically a 2d-array
-	std::vector<std::string> schematic = parse_schematic(file);
+	std::vector<std::string> schematic = parse_schematic(*input);
 
 	std::cout << "(part 1) Sum of all parts is:       " << sum_parts(schematic) << std::endl;
 	std::cout << "(part 2) Sum of all gear ratios is: " << sum_gears(schematic) << std::endl;

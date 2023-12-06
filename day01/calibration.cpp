@@ -70,7 +70,7 @@ uint64_t get_last_digit(std::string const& line) {
 	return digit;
 }
 
-uint64_t get_sum(std::ifstream& stream) {
+uint64_t get_sum(std::istream& stream) {
 	// Iterate through the entire document line by line and sum up
 	// their calibration values
 
@@ -105,8 +105,8 @@ uint64_t get_sum(std::ifstream& stream) {
 }
 
 int	main(int argc, char **argv) {
-	auto file = aoc::get_input_file(argc, argv);
-	uint64_t sum = get_sum(file);
+	auto input = aoc::get_input(argc, argv);
+	uint64_t sum = get_sum(*input);
 
 	std::cout << "Sum of all calibration values: " << sum << std::endl;
 	

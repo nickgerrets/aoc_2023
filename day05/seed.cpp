@@ -147,10 +147,10 @@ void process_seeds(std::vector<Range>& seeds, std::vector<Map> const& maps) {
 }
 
 int main(int argc, char** argv) {
-	auto file = aoc::get_input_file(argc, argv);
+	auto input = aoc::get_input(argc, argv);
 
-	std::vector<Range> seeds = parse_seeds(file);
-	std::vector<Map> maps = parse_maps(file);
+	std::vector<Range> seeds = parse_seeds(*input);
+	std::vector<Map> maps = parse_maps(*input);
 
 	auto locations = calculate_locations(seeds, maps);
 	std::cout << "(Part 1) Lowest location number: " <<

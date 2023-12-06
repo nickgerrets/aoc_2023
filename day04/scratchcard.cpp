@@ -67,11 +67,11 @@ void process_copies(std::vector<Scratchcard>& cards) {
 }
 
 int main(int argc, char** argv) {
-	auto file = aoc::get_input_file(argc, argv);
+	auto input = aoc::get_input(argc, argv);
 
 	// While for part 1 you really don't need to store the parsed cards,
 	// part 2 becomes a lot easier if you do.
-	std::vector<Scratchcard> cards = parse_cards(file);
+	std::vector<Scratchcard> cards = parse_cards(*input);
 
 	std::cout << "(Part 1) Sum of scratchcard values:  "
 		<< aoc::sum<uint64_t>(cards, &Scratchcard::calculate_value)
