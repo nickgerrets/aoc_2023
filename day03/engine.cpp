@@ -7,13 +7,13 @@ bool is_symbol(char c) {
 	return (!std::isdigit(c) && c != '.');
 }
 
-bool is_adjacent(std::vector<std::string> const& schematic, uint64_t x, uint64_t y) {
+bool is_adjacent(std::vector<std::string> const& schematic, size_t x, size_t y) {
 	bool adjacent = false;
 
-	uint64_t x_max = std::min(x + 2, (uint64_t)schematic[0].length());
-	uint64_t y_max = std::min(y + 2, (uint64_t)schematic.size());
-	uint64_t x_start = (x > 0) ? x - 1 : x;
-	uint64_t y_start = (y > 0) ? y - 1 : y;
+	size_t x_max = std::min(x + 2, (size_t)schematic[0].length());
+	size_t y_max = std::min(y + 2, (size_t)schematic.size());
+	size_t x_start = (x > 0) ? x - 1 : x;
+	size_t y_start = (y > 0) ? y - 1 : y;
 
 	for (y = y_start; y < y_max; ++y) {
 		for (x = x_start; x < x_max; ++x) {
@@ -48,7 +48,7 @@ uint64_t sum_parts(std::vector<std::string> const& schematic) {
 	return sum;
 }
 
-uint64_t parse_n(std::string const& line, uint64_t x) {
+uint64_t parse_n(std::string const& line, size_t x) {
 	uint64_t n = 0;
 	// Go all the way to the start of the number
 	while (x > 0 && std::isdigit(line[x - 1])) {
@@ -62,14 +62,14 @@ uint64_t parse_n(std::string const& line, uint64_t x) {
 	return n;
 }
 
-uint64_t calculate_ratio(std::vector<std::string> const& schematic, uint64_t x, uint64_t y) {
+uint64_t calculate_ratio(std::vector<std::string> const& schematic, size_t x, size_t y) {
 	uint64_t ratio = 1;
 	uint64_t count = 0;
 	
-	uint64_t x_max = std::min(x + 2, (uint64_t)schematic[0].length());
-	uint64_t y_max = std::min(y + 2, (uint64_t)schematic.size());
-	uint64_t x_start = (x > 0) ? x - 1 : x;
-	uint64_t y_start = (y > 0) ? y - 1 : y;
+	size_t x_max = std::min(x + 2, (size_t)schematic[0].length());
+	size_t y_max = std::min(y + 2, (size_t)schematic.size());
+	size_t x_start = (x > 0) ? x - 1 : x;
+	size_t y_start = (y > 0) ? y - 1 : y;
 
 	for (y = y_start; y < y_max; ++y) {
 		for (x = x_start; x < x_max; ++x) {
