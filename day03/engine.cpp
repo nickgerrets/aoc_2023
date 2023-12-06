@@ -1,6 +1,7 @@
 #include "common.h"
 
 #include <vector>
+#include <algorithm>
 
 bool is_symbol(char c) {
 	return (!std::isdigit(c) && c != '.');
@@ -9,8 +10,8 @@ bool is_symbol(char c) {
 bool is_adjacent(std::vector<std::string> const& schematic, uint64_t x, uint64_t y) {
 	bool adjacent = false;
 
-	uint64_t x_max = std::min(x + 2, schematic[0].length());
-	uint64_t y_max = std::min(y + 2, schematic.size());
+	uint64_t x_max = std::min(x + 2, (uint64_t)schematic[0].length());
+	uint64_t y_max = std::min(y + 2, (uint64_t)schematic.size());
 	uint64_t x_start = (x > 0) ? x - 1 : x;
 	uint64_t y_start = (y > 0) ? y - 1 : y;
 
@@ -65,8 +66,8 @@ uint64_t calculate_ratio(std::vector<std::string> const& schematic, uint64_t x, 
 	uint64_t ratio = 1;
 	uint64_t count = 0;
 	
-	uint64_t x_max = std::min(x + 2, schematic[0].length());
-	uint64_t y_max = std::min(y + 2, schematic.size());
+	uint64_t x_max = std::min(x + 2, (uint64_t)schematic[0].length());
+	uint64_t y_max = std::min(y + 2, (uint64_t)schematic.size());
 	uint64_t x_start = (x > 0) ? x - 1 : x;
 	uint64_t y_start = (y > 0) ? y - 1 : y;
 
