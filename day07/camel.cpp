@@ -1,11 +1,11 @@
 #include "common.h"
 
-#include <map>
+#include <unordered_map>
 #include <set>
 #include <vector>
 #include <sstream>
 
-static std::map<char, uint64_t> const PART1_VALUE_MAP = {
+static std::unordered_map<char, uint64_t> const PART1_VALUE_MAP = {
 	{'A', 0},
 	{'K', 1},
 	{'Q', 2},
@@ -21,7 +21,7 @@ static std::map<char, uint64_t> const PART1_VALUE_MAP = {
 	{'2', 12}
 };
 
-static std::map<char, uint64_t> const PART2_VALUE_MAP = {
+static std::unordered_map<char, uint64_t> const PART2_VALUE_MAP = {
 	{'A', 0},
 	{'K', 1},
 	{'Q', 2},
@@ -37,7 +37,7 @@ static std::map<char, uint64_t> const PART2_VALUE_MAP = {
 	{'J', 13} // Joker now weakest value
 };
 
-static std::map<char, uint64_t> const* CARD_VALUE_MAP = &PART1_VALUE_MAP;
+static auto const* CARD_VALUE_MAP = &PART1_VALUE_MAP;
 
 enum class Type {
 	FIVE_OF_A_KIND = 0,
@@ -52,20 +52,21 @@ enum class Type {
 template <bool PART2>
 Type get_hand_type(std::string const& str) {
 	std::multiset<char> as_set(str.begin(), str.end());
-
+	std::vector<size_t> counts;
 	uint64_t jokers = 0;
 
-	std::map<char, size_t> as_map;
+	char ep = 0;
 	for (auto const& e : as_set) {
+		if (e == ep) {
+			continue;
+		}
+		ep = e;
+		// Filter out jokers
 		if (PART2 && e == 'J') {
 			jokers = as_set.count(e);
 			continue ;
 		}
-		as_map.insert({e, as_set.count(e)});
-	}
-	std::vector<size_t> counts;
-	for (auto const& e : as_map) {
-		counts.push_back(e.second);
+		counts.push_back(as_set.count(e));
 	}
 	std::sort(counts.rbegin(), counts.rend());
 
@@ -98,6 +99,7 @@ struct Hand {
 	std::string cards;
 	Type type;
 
+	// less-than operator for easy sorting
 	bool operator<(Hand const& rhs) const {
 		if (type == rhs.type) {
 			for (size_t i = 0; i < cards.length(); ++i) {
