@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <sstream>
+#include <cmath>
 
 struct Race {
 	uint64_t time;

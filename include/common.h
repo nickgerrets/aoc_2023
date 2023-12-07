@@ -6,6 +6,7 @@
 # include <iostream>
 # include <limits>
 # include <algorithm>
+# include <memory>
 
 namespace aoc {
 
