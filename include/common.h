@@ -15,6 +15,27 @@ int sign(T const& x) {
 	return int((x > 0) - (x < 0));
 }
 
+template <typename T>
+T greatest_common_devisor(T a, T b) {
+	static_assert(std::is_integral<T>());
+	T gcd = std::min<T>(a, b);
+	while (gcd > 0) {
+		if (a % gcd == 0 && b % gcd == 0) {
+			break ;
+		}
+		--gcd;
+	}
+	return gcd;
+}
+
+template <typename T>
+T least_common_multiple(T a, T b) {
+	static_assert(std::is_integral<T>());
+	// first find greatest common devisor
+	T gcd = greatest_common_devisor(a, b);
+	return ((a / gcd) * b);
+}
+
 // ignore stream until next digit
 std::istream& next_digit(std::istream& in);
 

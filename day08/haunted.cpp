@@ -60,19 +60,6 @@ uint64_t solve_single(map_t const& nodes, std::string const& instructions, iter_
 	return count;
 }
 
-template<typename T>
-T least_common_multiple(T a, T b)
-{
-	// first find greatest common devisor
-	T gcd = std::min<T>(a, b);
-	while (gcd > 0)
-	{
-		if (a % gcd == 0 && b % gcd == 0) break ;
-		--gcd;
-	}
-	return ((a / gcd) * b);
-}
-
 std::vector<iter_t> get_keys_end_with(map_t const& nodes, char c) {
 	std::vector<iter_t> iterators;
 
@@ -97,7 +84,7 @@ uint64_t solve_lcm(map_t const& nodes, std::string const& instructions) {
 	*/
 
 	for (auto& it : iterators) {
-		lcm = least_common_multiple(lcm, solve_single(nodes, instructions, it));
+		lcm = aoc::least_common_multiple(lcm, solve_single(nodes, instructions, it));
 	}
 	return lcm;
 }
