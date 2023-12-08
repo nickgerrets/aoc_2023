@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <sstream>
 
+// LOCALE to filter input
 static auto const LOCALE = aoc::create_delimitor_locale<'=', '(', ',', ')'>();
 
 struct Node {
@@ -12,16 +13,15 @@ struct Node {
 };
 
 std::string parse_instructions(std::istream& stream) {
-	std::string str;
-
-	std::getline(stream, str);
+	std::string str; std::getline(stream, str); // just grab first line
 	return str;
 }
 
-std::unordered_map<std::string, Node> parse_nodes(std::istream& stream) {
-	std::unordered_map<std::string, Node> nodes;
-	for (auto& line : aoc::Lines(stream)) {
+using map_t = std::unordered_map<std::string, Node>;
 
+map_t parse_nodes(std::istream& stream) {
+	map_t nodes;
+	for (auto& line : aoc::Lines(stream)) {
 		if (line.length() == 0) {
 			continue;
 		}
@@ -36,11 +36,15 @@ std::unordered_map<std::string, Node> parse_nodes(std::istream& stream) {
 	return nodes;
 }
 
-uint64_t solve_single(std::unordered_map<std::string, Node> const& nodes, std::string const& instructions) {
+using iter_t = map_t::const_iterator;
+
+uint64_t solve_single(map_t const& nodes, std::string const& instructions, iter_t start_it) {
+	static char const END_CHAR = 'Z';
 	uint64_t count = 0;
 
-	auto it_current = nodes.find("AAA");
-	while (it_current->first != "ZZZ") {
+	// Simple enough, keep hopping through nodes until you find xxZ
+	auto it_current = start_it;
+	while (it_current->first.back() != END_CHAR) {
 		for (auto const& c : instructions) {
 			++count;
 			if (c == 'L') {
@@ -48,24 +52,12 @@ uint64_t solve_single(std::unordered_map<std::string, Node> const& nodes, std::s
 			} else if (c == 'R') {
 				it_current = nodes.find(it_current->second.right);
 			}
-			if (it_current->first == "ZZZ") {
+			if (it_current->first.back() == END_CHAR) {
 				return count;
 			}
 		}
 	}
 	return count;
-}
-
-using iter_t = std::unordered_map<std::string, Node>::const_iterator;
-std::vector<iter_t> get_keys_end_with(std::unordered_map<std::string, Node> const& nodes, char c) {
-	std::vector<iter_t> iterators;
-
-	for (auto it = nodes.begin(); it != nodes.end(); ++it) {
-		if (it->first.back() == c) {
-			iterators.push_back(it);
-		}
-	}
-	return iterators;
 }
 
 template<typename T>
@@ -81,7 +73,18 @@ T least_common_multiple(T a, T b)
 	return ((a / gcd) * b);
 }
 
-uint64_t solve_lcm(std::unordered_map<std::string, Node> const& nodes, std::string const& instructions) {
+std::vector<iter_t> get_keys_end_with(map_t const& nodes, char c) {
+	std::vector<iter_t> iterators;
+
+	for (auto it = nodes.begin(); it != nodes.end(); ++it) {
+		if (it->first.back() == c) {
+			iterators.push_back(it);
+		}
+	}
+	return iterators;
+}
+
+uint64_t solve_lcm(map_t const& nodes, std::string const& instructions) {
 	std::vector<iter_t> iterators = get_keys_end_with(nodes, 'A');
 	uint64_t lcm = 1;
 
@@ -94,24 +97,7 @@ uint64_t solve_lcm(std::unordered_map<std::string, Node> const& nodes, std::stri
 	*/
 
 	for (auto& it : iterators) {
-		uint64_t count = 0;
-		bool go = true;
-		while (go) {
-			go = true;
-			for (auto const& c : instructions) {
-				++count;
-				if (c == 'L') {
-					it = nodes.find(it->second.left);
-				} else if (c == 'R') {
-					it = nodes.find(it->second.right);
-				}
-				if (it->first.back() == 'Z') {
-					lcm = least_common_multiple(lcm, count);
-					go = false;
-					break;
-				}
-			}
-		}
+		lcm = least_common_multiple(lcm, solve_single(nodes, instructions, it));
 	}
 	return lcm;
 }
@@ -122,8 +108,13 @@ int main(int argc, char** argv) {
 	auto instructions = parse_instructions(*input);
 	auto nodes = parse_nodes(*input);
 
-	std::cout << "Steps required for node AAA to reach ZZZ:  " << solve_single(nodes, instructions) << std::endl;
-	std::cout << "Steps required for all nodes to reach xxZ: " << solve_lcm(nodes, instructions) << std::endl;
+	std::cout << "(Part 1) Steps required for node AAA to reach ZZZ:  "
+		<< solve_single(nodes, instructions, nodes.find("AAA"))
+		<< std::endl;
+
+	std::cout << "(Part 2) Steps required for all nodes to reach xxZ: "
+		<< solve_lcm(nodes, instructions)
+		<< std::endl;
 
 	return (EXIT_SUCCESS);
 }
