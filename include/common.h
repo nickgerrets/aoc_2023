@@ -73,10 +73,21 @@ T sum(ContainerT const& container) {
 }
 
 template <typename T, typename ContainerT, typename _Method>
-T sum(ContainerT const& container, _Method method) {
+typename std::enable_if<std::is_member_function_pointer<_Method>::value, T>::type
+sum(ContainerT const& container, _Method method) {
 	T n = 0;
 	for (auto const& e : container) {
 		n = n + (e.*method)();
+	}
+	return n;
+}
+
+template <typename T, typename ContainerT, typename _Function>
+typename std::enable_if<!std::is_member_function_pointer<_Function>::value, T>::type
+sum(ContainerT const& container, _Function function) {
+	T n = 0;
+	for (auto const& e : container) {
+		n = n + function(e);
 	}
 	return n;
 }
@@ -91,10 +102,21 @@ T product(ContainerT const& container) {
 }
 
 template <typename T, typename ContainerT, typename _Method>
-T product(ContainerT const& container, _Method method) {
+typename std::enable_if<std::is_member_function_pointer<_Method>::value, T>::type
+product(ContainerT const& container, _Method method) {
 	T n = 1;
 	for (auto const& e : container) {
 		n = n * (e.*method)();
+	}
+	return n;
+}
+
+template <typename T, typename ContainerT, typename _Function>
+typename std::enable_if<!std::is_member_function_pointer<_Function>::value, T>::type
+product(ContainerT const& container, _Function function) {
+	T n = 1;
+	for (auto const& e : container) {
+		n = n * function(e);
 	}
 	return n;
 }
