@@ -23,7 +23,7 @@ sequences_t parse_sequences(std::istream& input) {
 	return sequences;
 }
 
-seq_t calculate_difference(seq_t const& sequence) {
+seq_t calculate_differences(seq_t const& sequence) {
 	seq_t diff;
 
 	for (auto it = sequence.begin(); it != sequence.end(); ++it) {
@@ -38,36 +38,20 @@ seq_t calculate_difference(seq_t const& sequence) {
 	return diff;
 }
 
-int64_t calculate_next(seq_t const& sequence) {
-	seq_t seq = calculate_difference(sequence);
+int64_t extrapolate_next(seq_t const& sequence) {
+	seq_t seq = calculate_differences(sequence);
 	if (seq.back() == 0) {
 		return sequence.back();
 	}
-	return calculate_next(seq) + sequence.back();
+	return extrapolate_next(seq) + sequence.back();
 }
 
-int64_t calculate_prev(seq_t const& sequence) {
-	seq_t seq = calculate_difference(sequence);
+int64_t extrapolate_previous(seq_t const& sequence) {
+	seq_t seq = calculate_differences(sequence);
 	if (seq.back() == 0) {
 		return sequence[0];
 	}
-	return sequence[0] - calculate_prev(seq);
-}
-
-int64_t extrapolate_next(sequences_t const& sequences) {
-	int64_t sum = 0;
-	for (auto const& s : sequences) {
-		sum += calculate_next(s);
-	}
-	return sum;
-}
-
-int64_t extrapolate_previous(sequences_t const& sequences) {
-	int64_t sum = 0;
-	for (auto const& s : sequences) {
-		sum += calculate_prev(s);
-	}
-	return sum;
+	return sequence[0] - extrapolate_previous(seq);
 }
 
 int main(int argc, char** argv) {
@@ -75,8 +59,12 @@ int main(int argc, char** argv) {
 
 	auto sequences = parse_sequences(*input);
 
-	std::cout << "Sum of extrapolated next values:     " << extrapolate_next(sequences) << std::endl;
-	std::cout << "Sum of extrapolated previous values: " << extrapolate_previous(sequences) << std::endl;
+	std::cout << "Sum of extrapolated next values:     "
+		<< aoc::sum<int64_t>(sequences, extrapolate_next)
+		<< std::endl;
+	std::cout << "Sum of extrapolated previous values: "
+		<< aoc::sum<int64_t>(sequences, extrapolate_previous)
+		<< std::endl;
 
 	return (EXIT_SUCCESS);
 }
