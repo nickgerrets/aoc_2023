@@ -1,5 +1,5 @@
 # don't want to post my input
-input.txt
+input*.txt
 
 # cmake
 build
