@@ -17,7 +17,7 @@ int sign(T const& x) {
 
 template <typename T>
 T greatest_common_devisor(T a, T b) {
-	static_assert(std::is_integral<T>());
+	static_assert(std::is_integral<T>(), "Type has to be integral");
 	T gcd = std::min<T>(a, b);
 	while (gcd > 0) {
 		if (a % gcd == 0 && b % gcd == 0) {
@@ -30,7 +30,7 @@ T greatest_common_devisor(T a, T b) {
 
 template <typename T>
 T least_common_multiple(T a, T b) {
-	static_assert(std::is_integral<T>());
+	static_assert(std::is_integral<T>(), "Type has to be integral");
 	// first find greatest common devisor
 	T gcd = greatest_common_devisor(a, b);
 	return ((a / gcd) * b);
