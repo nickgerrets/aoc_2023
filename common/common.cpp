@@ -14,8 +14,7 @@ std::istream& next_digit(std::istream& in) {
 }
 
 std::ifstream get_input_file(int argc, char** argv) {
-	if (argc < 2) {
-		// throw std::runtime_error(std::string("usage: ") + argv[0] + " <file>");
+	if (argc < 2 || argv == nullptr || argv[1] == nullptr) {
 		return std::ifstream();
 	}
 

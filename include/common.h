@@ -7,8 +7,13 @@
 # include <limits>
 # include <algorithm>
 # include <memory>
+# include <cassert>
 
 namespace aoc {
+
+/* -------------------------------------------------------------------------- */
+/*                                Math Helpers                                */
+/* -------------------------------------------------------------------------- */
 
 template <typename T> constexpr
 int sign(T const& x) {
@@ -36,18 +41,21 @@ T least_common_multiple(T a, T b) {
 	return ((a / gcd) * b);
 }
 
-// ignore stream until next digit
+/* -------------------------------------------------------------------------- */
+/*                               Stream Helpers                               */
+/* -------------------------------------------------------------------------- */
+
+// ignore stream until next digit (exclusive)
 std::istream& next_digit(std::istream& in);
 
-//	skips until (and including) next CHARACTER
-template <char CHARACTER = ' '>
+//	skips until next CHARACTER (inclusive)
+template <char CHARACTER = '\n'>
 std::istream& skip(std::istream& in) {
 	return (in.ignore(std::numeric_limits<std::streamsize>::max(), CHARACTER));
 }
 
 // return input file stream of input file or throw exception
 std::ifstream get_input_file(int argc, char** argv);
-
 
 struct InputDelete {
 	void operator()(std::istream* p) const {
@@ -58,12 +66,13 @@ struct InputDelete {
 	}
 };
 
+// return input stream of input file if there's a file or stdin if there's none
 std::unique_ptr<std::istream, InputDelete> get_input(int argc, char** argv);
 
 /* -------------------------------------------------------------------------- */
 /*                                 Aggregates                                 */
 /* -------------------------------------------------------------------------- */
-template <typename T, typename ContainerT>
+template <typename T = int64_t, typename ContainerT>
 T sum(ContainerT const& container) {
 	T n = 0;
 	for (auto const& e : container) {
@@ -72,8 +81,10 @@ T sum(ContainerT const& container) {
 	return n;
 }
 
-template <typename T, typename ContainerT, typename _Method>
-typename std::enable_if<std::is_member_function_pointer<_Method>::value, T>::type
+template <typename T = int64_t, typename ContainerT, typename _Method>
+typename std::enable_if<
+	std::is_member_function_pointer<_Method>::value, // case is a member function (method)
+	T>::type
 sum(ContainerT const& container, _Method method) {
 	T n = 0;
 	for (auto const& e : container) {
@@ -82,8 +93,10 @@ sum(ContainerT const& container, _Method method) {
 	return n;
 }
 
-template <typename T, typename ContainerT, typename _Function>
-typename std::enable_if<!std::is_member_function_pointer<_Function>::value, T>::type
+template <typename T = int64_t, typename ContainerT, typename _Function>
+typename std::enable_if<
+	!std::is_member_function_pointer<_Function>::value, // case not a member function
+	T>::type
 sum(ContainerT const& container, _Function function) {
 	T n = 0;
 	for (auto const& e : container) {
@@ -92,7 +105,7 @@ sum(ContainerT const& container, _Function function) {
 	return n;
 }
 
-template <typename T, typename ContainerT>
+template <typename T = int64_t, typename ContainerT>
 T product(ContainerT const& container) {
 	T n = 1;
 	for (auto const& e : container) {
@@ -101,8 +114,10 @@ T product(ContainerT const& container) {
 	return n;
 }
 
-template <typename T, typename ContainerT, typename _Method>
-typename std::enable_if<std::is_member_function_pointer<_Method>::value, T>::type
+template <typename T = int64_t, typename ContainerT, typename _Method>
+typename std::enable_if<
+	std::is_member_function_pointer<_Method>::value, // case is a member function (method)
+	T>::type
 product(ContainerT const& container, _Method method) {
 	T n = 1;
 	for (auto const& e : container) {
@@ -111,8 +126,10 @@ product(ContainerT const& container, _Method method) {
 	return n;
 }
 
-template <typename T, typename ContainerT, typename _Function>
-typename std::enable_if<!std::is_member_function_pointer<_Function>::value, T>::type
+template <typename T = int64_t, typename ContainerT, typename _Function>
+typename std::enable_if<
+	!std::is_member_function_pointer<_Function>::value, // case not a member function
+	T>::type
 product(ContainerT const& container, _Function function) {
 	T n = 1;
 	for (auto const& e : container) {
@@ -165,8 +182,10 @@ struct Lines {
 // custom facets for locales, allowing easier parsing through streams
 template <char C, char... Args>
 struct DelimitorFacet : public std::ctype<char> {
-	DelimitorFacet(size_t refs = 0) : std::ctype<char>(custom_table, false, refs) {
-		std::copy_n(classic_table(), table_size, custom_table);
+	using parent_t = std::ctype<char>;
+
+	DelimitorFacet(size_t refs = 0) : parent_t(custom_table, false, refs) {
+		std::copy_n(parent_t::classic_table(), table_size, custom_table);
 		set_characters<C, Args...>();
 	}
 
@@ -184,7 +203,7 @@ struct DelimitorFacet : public std::ctype<char> {
 		custom_table[_First] = space;
 	}
 
-	mask custom_table[table_size];
+	parent_t::mask custom_table[table_size];
 };
 
 // Helper to create a delimitor locale

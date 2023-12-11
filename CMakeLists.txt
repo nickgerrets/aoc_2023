@@ -1,7 +1,10 @@
-cmake_minimum_required(VERSION 3.1...3.27)
+cmake_minimum_required(VERSION 3.2...3.27)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+add_compile_options(-fsanitize=address)
+add_link_options(-fsanitize=address)
 
 project(AdventOfCode2023 LANGUAGES CXX)
 
