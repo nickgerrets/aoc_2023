@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <stack>
+#include <unordered_map>
 
 enum Location {
 	NONE = 0,
