@@ -3,8 +3,9 @@ cmake_minimum_required(VERSION 3.2...3.27)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_compile_options(-fsanitize=address)
-add_link_options(-fsanitize=address)
+# add_compile_options(-fsanitize=address)
+# add_link_options(-fsanitize=address)
+add_compile_options(-O3)
 
 project(AdventOfCode2023 LANGUAGES CXX)
 
@@ -22,3 +23,4 @@ add_subdirectory(day10)
 add_subdirectory(day11)
 add_subdirectory(day12)
 add_subdirectory(day13)
+add_subdirectory(day14)
