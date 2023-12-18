@@ -1,17 +1,8 @@
 #include "common.h"
+#include "vec2.h"
 
 #include <vector>
 #include <set>
-
-struct Pos {
-	int64_t y;
-	int64_t x;
-
-	int64_t distance(Pos const& other) const {
-		// "manhattan distance"
-		return (std::abs(y - other.y) + std::abs(x - other.x));
-	}
-};
 
 static char const GALAXY_CHAR = '#';
 
@@ -43,12 +34,12 @@ std::vector<std::string> parse_lines(std::istream& stream) {
 }
 
 // Map the galaxies to a certain position, keeping expansion into account
-std::vector<Pos> map_galaxies(std::vector<std::string> const& lines, int64_t const expansion = 2) {
+std::vector<Vec2> map_galaxies(std::vector<std::string> const& lines, int64_t const expansion = 2) {
 	assert(expansion > 0);
 
 	auto empty_columns = get_empty_columns(lines);
 
-	std::vector<Pos> galaxies;
+	std::vector<Vec2> galaxies;
 	int64_t y = 0;
 	for (int64_t yi = 0; yi < lines.size(); ++yi) {
 		// Vertical expansion
@@ -67,7 +58,7 @@ std::vector<Pos> map_galaxies(std::vector<std::string> const& lines, int64_t con
 
 			// Add expanded coordinate
 			if (lines[yi][xi] == GALAXY_CHAR) {
-				galaxies.push_back({.y = y + yi, .x = x + xi});
+				galaxies.push_back({x + xi, y + yi});
 			}
 		}
 	}
@@ -75,8 +66,8 @@ std::vector<Pos> map_galaxies(std::vector<std::string> const& lines, int64_t con
 }
 
 // Simply create pairs for every galaxy - galaxy combination
-std::vector<std::pair<Pos, Pos>> get_pairs(std::vector<Pos> const& galaxies) {
-	std::vector<std::pair<Pos, Pos>> pairs;
+std::vector<std::pair<Vec2, Vec2>> get_pairs(std::vector<Vec2> const& galaxies) {
+	std::vector<std::pair<Vec2, Vec2>> pairs;
 	for (auto it1 = galaxies.begin(); it1 != galaxies.end(); ++it1) {
 		for (auto it2 = it1 + 1; it2 != galaxies.end(); ++it2) {
 			pairs.emplace_back(*it1, *it2);
@@ -93,8 +84,8 @@ int main(int argc, char** argv) {
 	auto pairs = get_pairs(galaxies);
 
 	// Simple lambda for getting distance between Positions in a pair
-	auto distance = [] (std::pair<Pos, Pos> const& pair) {
-		return pair.first.distance(pair.second);
+	auto distance = [] (std::pair<Vec2, Vec2> const& pair) {
+		return pair.first.manhattan(pair.second);
 	};
 
 	std::cout << "(Part 1) Sum of lengths of shortest paths between galaxies: "

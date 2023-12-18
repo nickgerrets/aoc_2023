@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vec2.h"
 
 #include <vector>
 #include <queue>
@@ -11,37 +12,9 @@ grid_t parse_grid(std::istream& stream) {
 	return grid_t(lines.begin(), lines.end());
 }
 
-struct Pos {
-	int64_t x, y;
-
-	bool operator!=(Pos const& rhs) const {
-		return (x != rhs.x && y != rhs.y);
-	}
-
-	bool operator==(Pos const& rhs) const {
-		return (x == rhs.x && y == rhs.y);
-	}
-	
-	bool operator<(Pos const& rhs) const {
-		return (x < rhs.x && y < rhs.y);
-	}
-
-	Pos inverse() const {
-		return {x * -1, y * -1};
-	}
-
-	std::string to_string() const {
-		return (std::to_string(x) + std::to_string(y));
-	}
-
-	Pos operator+(Pos const& rhs) const {
-		return {x + rhs.x, y + rhs.y};
-	}
-};
-
 struct Permutation {
-	Pos pos;
-	Pos dir;
+	Vec2 pos;
+	Vec2 dir;
 	int64_t count;
 
 	bool operator==(Permutation const& rhs) const {
@@ -57,6 +30,7 @@ struct Permutation {
 	}
 };
 
+// Hash permutations for the distance map
 template <>
 struct std::hash<Permutation> {
 	size_t operator()(Permutation const& d) const {
@@ -64,21 +38,21 @@ struct std::hash<Permutation> {
 	}
 };
 
-struct Qdata {
-	int64_t cost;
+struct Data {
+	size_t cost;
 	Permutation data;
 
-	bool operator<(Qdata const& rhs) const {
-		return cost > rhs.cost; // flipped for priority queue
+	bool operator<(Data const& rhs) const {
+		return cost > rhs.cost; // needs to be sorted based on cost being higher
 	}
 
-	bool operator==(Qdata const& rhs) const {
+	bool operator==(Data const& rhs) const {
 		return (cost == rhs.cost && data == rhs.data);
 	}
 
 };
 
-int64_t get_min(std::unordered_map<Permutation, int64_t> const& distances, Pos end) {
+int64_t get_min(std::unordered_map<Permutation, int64_t> const& distances, Vec2 const end) {
 	int64_t min_distance = INT64_MAX;
 	for (auto const& p : distances) {
 		if (p.first.pos == end) {
@@ -90,16 +64,16 @@ int64_t get_min(std::unordered_map<Permutation, int64_t> const& distances, Pos e
 
 template <bool PART2>
 int64_t solve(grid_t const& grid) {
-	Pos const END_POS = {(int64_t)grid[0].length() - 1, (int64_t)grid.size() - 1};
+	Vec2 const END_POS (grid[0].length() - 1, grid.size() - 1);
 
-	std::priority_queue<Qdata> q;
-	q.push({0, {{0, 0}, {1, 0}, 0}}); // RIGHT
-	q.push({0, {{0, 0}, {0, 1}, 0}}); // DOWN
+	std::priority_queue<Data> q;
+	q.push({0, {{}, Vec2::right(), 0}}); // RIGHT
+	q.push({0, {{}, Vec2::down(), 0}}); // DOWN
 
 	std::unordered_map<Permutation, int64_t> distances;
 
 	while (!q.empty()) {
-		Qdata q_current = q.top(); q.pop();
+		Data q_current = q.top(); q.pop();
 		Permutation& curr = q_current.data;
 
 		if (curr.pos == END_POS) {
@@ -112,16 +86,16 @@ int64_t solve(grid_t const& grid) {
 
 		distances[curr] = q_current.cost;
 
-		std::initializer_list<Pos> DIRS {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
+		std::initializer_list<Vec2> DIRS {Vec2::right(), Vec2::up(), Vec2::left(), Vec2::down()};
 		for (auto const& new_dir : DIRS) {
 			// Can't reverse
-			if (curr.dir == new_dir.inverse()) {
+			if (curr.dir == -new_dir) {
 				continue ;
 			}
 
-			Pos new_pos = curr.pos + new_dir;
+			Vec2 new_pos = curr.pos + new_dir;
 			// bounds check
-			if (new_pos.y < 0 || new_pos.x < 0 || new_pos.y >= grid.size() || new_pos.x >= grid[0].length()) {
+			if (!new_pos.is_within_bounds({0, 0}, END_POS)) {
 				continue ;
 			}
 

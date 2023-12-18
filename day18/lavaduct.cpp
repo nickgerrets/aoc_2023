@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vec2.h"
 
 #include <vector>
 #include <sstream>
@@ -35,24 +36,23 @@ std::vector<Instruction> parse_instructions(std::istream& stream) {
 	return instructions;
 }
 
-void dir_from_c(char c, int64_t& dirx,  int64_t& diry) {
-	dirx = 0;
-	diry = 0;
+Vec2 dir_from_c(char c) {
 	switch (c) {
-		case 'R': dirx = 1; break;
-		case 'D': diry = 1; break;
-		case 'L': dirx = -1; break;
-		case 'U': diry = -1; break;
+		case 'R': return {1, 0};
+		case 'D': return {0, 1};
+		case 'L': return {-1, 0};
+		case 'U': return {0, -1};
 	}
+	return {0, 0};
 }
 
-int64_t polygonal_area(std::vector<std::pair<int64_t, int64_t>> const& lines) {
+int64_t polygonal_area(std::vector<Vec2> const& lines) {
 	// https://web.archive.org/web/20100405070507/http://valis.cs.uiuc.edu/~sariel/research/CG/compgeom/msg00831.html
 	double area;
 	for (size_t i = 0; i < lines.size() - 1; ++i) {
 		size_t j = (i + 1) % lines.size();
-		area += lines[i].first * lines[j].second;
-		area -= lines[j].first * lines[i].second;
+		area += lines[i].x * lines[j].y;
+		area -= lines[j].x * lines[i].y;
 	}
 	area = std::abs(area) * 0.5;
 	return static_cast<int64_t>(area);
@@ -60,24 +60,21 @@ int64_t polygonal_area(std::vector<std::pair<int64_t, int64_t>> const& lines) {
 
 template <bool PART2 = false>
 int64_t calculate_area(std::vector<Instruction> const& instructions) {
-	std::vector<std::pair<int64_t, int64_t>> lines;
+	std::vector<Vec2> lines;
 	int64_t total_length = 0;
 
 	// cursor
-	size_t cx = 0;
-	size_t cy = 0;
+	Vec2 cursor {0, 0};
 	for (auto const& i : instructions) {
 		char c = PART2 ? i.true_dir : i.direction;
-		
-		int64_t dirx, diry;
-		dir_from_c(c, dirx, diry);
+
+		Vec2 dir = dir_from_c(c);
 
 		int64_t len = PART2 ? i.true_count : i.count;
 
-		cx = cx + dirx * len;
-		cy = cy + diry * len;
+		cursor = cursor + (dir * len);
 
-		lines.push_back({cx, cy});
+		lines.push_back(cursor);
 		total_length += len;
 	}
 	return polygonal_area(lines) + total_length / 2 + 1;

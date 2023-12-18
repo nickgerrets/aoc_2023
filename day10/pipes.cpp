@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vec2.h"
 
 #include <vector>
 #include <stack>
@@ -12,28 +13,6 @@ enum Location {
 };
 
 using loc_map_t = std::vector<std::vector<Location>>;
-
-struct Pos {
-	int64_t y;
-	int64_t x;
-
-	Pos operator+(Pos const& rhs) const {
-		return {.y = y + rhs.y, .x = x + rhs.x};
-	}
-
-	Pos operator-(Pos const& rhs) const {
-		return {.y = y - rhs.y, .x = x - rhs.x};
-	}
-
-	bool operator==(Pos const& rhs) const {
-		return (x == rhs.x && y == rhs.y);
-	}
-
-	bool operator!=(Pos const& rhs) const {
-		return !(*this == rhs);
-	}
-};
-
 using pipe_map_t = std::vector<std::string>;
 
 pipe_map_t parse_map(std::istream& stream) {
@@ -41,11 +20,11 @@ pipe_map_t parse_map(std::istream& stream) {
 	return pipe_map_t(lines.begin(), lines.end());
 }
 
-Pos find_start(pipe_map_t const& map) {
+Vec2 find_start(pipe_map_t const& map) {
 	for (int64_t y = 0; y < map.size(); ++y) {
 		for (int64_t x = 0; x < map[0].size(); ++x) {
 			if (map[y][x] == 'S') {
-				return {y, x};
+				return {x, y};
 			}
 		}
 	}
@@ -62,40 +41,33 @@ Pos find_start(pipe_map_t const& map) {
 	. is ground; there is no pipe in this tile.
 	S is the starting position (connecting all 4 directions)
 */
-static std::unordered_map<char, std::vector<Pos>> const DIRECTION_MAP = {
-	{ 'S', {{-1, 0}, {1, 0}, {0, -1}, {0, 1}} },
-	{ '|', {{-1, 0}, {1, 0}} },
-	{ '-', {{0, -1}, {0, 1}} },
-	{ 'L', {{-1, 0}, {0, 1}} },
-	{ 'J', {{-1, 0}, {0, -1}} },
-	{ '7', {{1, 0}, {0, -1}} },
-	{ 'F', {{1, 0}, {0, 1}} },
+static std::unordered_map<char, std::vector<Vec2>> const DIRECTION_MAP = {
+	{ 'S', {Vec2::up(), Vec2::down(), Vec2::left(), Vec2::right()} },
+	{ '|', {Vec2::up(), Vec2::down()} },
+	{ '-', {Vec2::left(), Vec2::right()} },
+	{ 'L', {Vec2::up(), Vec2::right()} },
+	{ 'J', {Vec2::up(), Vec2::left()} },
+	{ '7', {Vec2::down(), Vec2::left()} },
+	{ 'F', {Vec2::down(), Vec2::right()} },
 	{ '.', {}}
 };
 
-bool is_within_bounds(pipe_map_t const& map, Pos p) {
-	if (p.y < 0 || p.y >= map.size() || p.x < 0 || p.x >= map[0].size()) {
-		return false;
-	}
-	return true;
-}
-
-std::vector<Pos> get_connections(pipe_map_t const& map, Pos p) {
+std::vector<Vec2> get_connections(pipe_map_t const& map, Vec2 p) {
+	Vec2 const END_POS = Vec2(map[0].length() - 1, map.size() - 1);
 	// Bounds check
-	if (!is_within_bounds(map, p)) {
+	if (!p.is_within_bounds({0, 0}, END_POS)) {
 		return {};
 	}
 
-	std::vector<Pos> connections;
-	for (Pos const& d : DIRECTION_MAP.at(map[p.y][p.x])) {
-		Pos d_abs = d + p; // to absolute position
-		if (!is_within_bounds(map, d_abs)) {
+	std::vector<Vec2> connections;
+	for (Vec2 const& d : DIRECTION_MAP.at(map[p.y][p.x])) {
+		Vec2 d_abs = d + p; // to absolute position
+		if (!d_abs.is_within_bounds({0, 0}, END_POS)) {
 			continue;
 		}
 
 		auto next_dirs = DIRECTION_MAP.at(map[d_abs.y][d_abs.x]);
-
-		for (Pos& n : next_dirs) {
+		for (Vec2& n : next_dirs) {
 			if (n + d_abs == p) {
 				connections.push_back(d_abs);
 				break ;
@@ -106,17 +78,17 @@ std::vector<Pos> get_connections(pipe_map_t const& map, Pos p) {
 }
 
 // Trace a path from S through the loop back to S
-std::vector<Pos> find_path(pipe_map_t const& map) {
-	Pos start = find_start(map);
+std::vector<Vec2> find_path(pipe_map_t const& map) {
+	Vec2 start = find_start(map);
 
 	// For every connection coming from start
 	auto connections = get_connections(map, start);
-	for (Pos& current : connections) {
-		std::vector<Pos> path;
+	for (Vec2& current : connections) {
+		std::vector<Vec2> path;
 		path.push_back(start);
 		path.push_back(current);
 
-		Pos from = start;
+		Vec2 from = start;
 		// trace a path
 		for (auto to = get_connections(map, current); to.size() == 2; to = get_connections(map, current)) {
 			path.push_back( (to[0] == from) ? to[1] : to[0] );
@@ -131,7 +103,7 @@ std::vector<Pos> find_path(pipe_map_t const& map) {
 	return {}; // no path
 }
 
-void draw_path(loc_map_t& map, std::vector<Pos> const& path) {
+void draw_path(loc_map_t& map, std::vector<Vec2> const& path) {
 	for (auto const& p : path) {
 		map[p.y][p.x] = PATH;
 	}
@@ -164,12 +136,12 @@ size_t calculate_inside(loc_map_t& result_map, pipe_map_t const& pipe_map) {
 	return amount;
 }
 
-void determine_start_char(pipe_map_t& pipe_map, std::vector<Pos> const& path) {
+void determine_start_char(pipe_map_t& pipe_map, std::vector<Vec2> const& path) {
 	assert(path.size() > 1);
 
-	Pos start = find_start(pipe_map);
-	Pos pos_up = path[1] - start;
-	Pos pos_down = path[path.size() - 2] - start;
+	Vec2 start = find_start(pipe_map);
+	Vec2 pos_up = path[1] - start;
+	Vec2 pos_down = path[path.size() - 2] - start;
 
 	if (pos_up.y >= 0 && pos_down.y >= 0) {
 		return ; // Not interested
@@ -188,6 +160,7 @@ void determine_start_char(pipe_map_t& pipe_map, std::vector<Pos> const& path) {
 	pipe_map[start.y][start.x] = c;
 }
 
+/*
 void debug_map_draw(loc_map_t const& result_map) {
 	for (auto const& row : result_map) {
 		for (auto const& x : row) {
@@ -202,6 +175,7 @@ void debug_map_draw(loc_map_t const& result_map) {
 		std::cout << std::endl;
 	}
 }
+*/
 
 int main(int argc, char** argv) {
 	auto input = aoc::get_input(argc, argv);
