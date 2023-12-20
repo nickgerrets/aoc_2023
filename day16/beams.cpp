@@ -109,14 +109,14 @@ int main(int argc, char** argv) {
 	for (int64_t y = 0; y < grid.size(); ++y) {
 		int64_t maxy = std::max(
 			solve(grid, {{0, y}, Vec2::right()}),
-			solve(grid, {{(int64_t)grid[0].length() - 1, y}, Vec2::left()}));
+			solve(grid, {Vec2(grid[0].length() - 1, y), Vec2::left()}));
 		energized = std::max(energized, maxy);
 	}
 
 	for (int64_t x = 0; x < grid[0].length(); ++x) {
 		int64_t maxx = std::max(
 			solve(grid, {{x, 0}, Vec2::down()}),
-			solve(grid, {{x, (int64_t)grid.size() - 1}, Vec2::up()}));
+			solve(grid, {Vec2(x, grid.size() - 1), Vec2::up()}));
 		energized = std::max(energized, maxx);
 	}
 
